@@ -9,6 +9,18 @@
         <div id="gantt_here" style='width:100%; height:500px;'>
         </div>
         <script>
+        var textEditor = {type:'text',map_to:"Holder"};
+        gantt.config.columns =  [
+    {name:"text",       label:"Task name",  tree:true, width:"*" },
+    {name:"Holder",     label:"Holder",     tree:true, width:"*",  editor: textEditor},
+    {name:"start_date", label:"Start time", align:"center" },
+    {name:"end_date",   label:"End date",   align:"center" },
+    {name:"progress",   label:"Progress",   align:"center" },
+    {name: "add", width: 44 }
+];
+
+
+
         gantt.config.date_format = "%Y-%m-%d %H:%i";
 
         gantt.config.open_tree_initially = true;
