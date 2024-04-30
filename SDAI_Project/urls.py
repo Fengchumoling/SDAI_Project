@@ -23,4 +23,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     path("index/", index),
+    path("d3j/", d3j),
 ]
