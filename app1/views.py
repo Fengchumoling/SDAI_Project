@@ -8,3 +8,6 @@ def index(request):
 
 def d3j(request):
     return render(request, 'd3j.html')
+
+def gantt(request):
+    return render(request, 'gantt.html')
