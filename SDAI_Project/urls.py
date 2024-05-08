@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path
 from app1.views import *
 from rest_framework.urlpatterns import format_suffix_patterns
+from app1.views import wbs_tool, get_wbs_data
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,4 +27,6 @@ urlpatterns = [
     path("index/", index),
     path("d3j/", d3j),
     path("gantt/",gantt),
+    path('wbs_tool/', wbs_tool, name='wbs_tool'),
+    path('get-wbs-data/', get_wbs_data, name='get_wbs_data')
 ]
