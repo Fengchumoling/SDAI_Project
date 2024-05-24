@@ -25,5 +25,8 @@ urlpatterns = [
 
     path("index/", index),
     path("d3j/", d3j),
-    path("gantt/",gantt),
+    path("gantt/", gantt),
+
+    path("getGanttData/", getGanttData),
+    path("changeGanttData/", changeGanttData),
 ]
