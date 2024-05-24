@@ -29,4 +29,7 @@ urlpatterns = [
 
     path("getGanttData/", getGanttData),
     path("changeGanttData/", changeGanttData),
+    path("gantt/",gantt),
+    path('wbs_tool/', wbs_tool, name='wbs_tool'),
+    path('get-wbs-data/', get_wbs_data, name='get_wbs_data')
 ]

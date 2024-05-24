@@ -48,3 +48,9 @@ class Link(models.Model):
     target = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     lag = models.IntegerField(blank=True, default=0)
+
+
+class WBSElement(models.Model):
+    name = models.CharField(max_length=255)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+    order = models.IntegerField(default=0)
