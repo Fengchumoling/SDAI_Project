@@ -18,18 +18,65 @@
     {name: "add", width: 44 }
 ];
 
+        var opts = [
+    {key:1, label: "0%", value: 0},
+    {key:2, label: "25%", value: 0.25},
+    {key:3, label: "50%", value: 0.50},
+    {key:4, label: "75%", value: 0.75},
+    {key:5, label: "100%", value: 1}
+];
+
     gantt.config.lightbox.sections=[
     {name:"description", height:70, map_to:"text", type:"textarea", focus:true},
     {name:"holder", height:30, map_to:"Holder", type:"textarea"},
+    {name:"progress", height:30, map_to:"progress", type: "progress"},
     {name:"time", height:72, map_to:"auto", type:"duration"}
 ];
 
+    gantt.templates.progress_text = function(start, end, task) {
+        return "<div class='gantt_task_progress_text'>" + Math.round(task.progress * 100) + "%</div>";
+    };
+
+
+var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range' min='0' max='100' value='0' step='1' style='width:100%;' oninput='outputUpdate(value)'></div>" +
+    "<span id='output'>0%</span>"
+
+    function outputUpdate(value) {document.getElementById('output').innerText = value + '%';};
+
+    gantt.form_blocks["progress"] = {
+
+            render: function(sns) {
+                return range
+            },
+            set_value: function(node, value, task) {
+                node.getElementsByTagName("input")[0].value = value * 100;
+            },
+            get_value: function(node, task) {
+                return node.getElementsByTagName("input")[0].value / 100;
+            },
+            focus: function(node) {
+                var a = node.getElementsByTagName("input")[0];
+                a.focus();
+                a.select();
+            }
+        };
+
+        gantt.attachEvent("onLightboxSave", function(id, task, is_new) {
+            var progress = task.progress;
+            gantt.getTask(id).progress = progress;
+            gantt.updateTask(id);
+            return true;
+        });
+
+
     gantt.locale.labels.section_holder = "Holder";
+    gantt.locale.labels.section_progress = "Progress";
 
     gantt.config.scales = [
     {unit: "month", step: 1, format: "%F, %Y"},
     {unit: "day", step:1, format: "%j, %D"}
 ];
+
 
     gantt.attachEvent("onBeforeGanttRender", function(){
    var range = gantt.getSubtaskDates();

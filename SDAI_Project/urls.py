@@ -17,8 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
+
 from app1.views import *
-from rest_framework.urlpatterns import format_suffix_patterns
 from app1.views import wbs_tool, get_wbs_data
 
 urlpatterns = [

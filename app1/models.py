@@ -27,6 +27,7 @@ class Activity(models.Model):
     activity_end_date = models.DateField()
     activity_duration = models.DurationField()
     activity_resource = models.ManyToManyField('User')
+    activity_progress = models.IntegerField(default=0)
 
     def __str__(self):
         return self.activity_name
