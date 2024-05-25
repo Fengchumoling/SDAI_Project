@@ -72,45 +72,63 @@
     {unit: "day", step:1, format: "%j, %D"}
 ];
 
+    gantt.attachEvent("onTaskUpdated", function(id, task){
+    // 获取当前时间
+    var currentDate = new Date();
+
+    // 获取已经更新的任务
+    var task1 = gantt.getTask(id);
+
+    // 判断当前时间是否超过任务结束时间
+    if(currentDate > gantt.calculateEndDate(task1)){
+        // 判断进度是否未达到100%
+        if(task1.progress < 1){
+            // 未达到100%则改变任务颜色
+            task1.color = "red"; // 这里可以设置为你想要的颜色
+            gantt.refreshData(); // 刷新数据以应用新的颜色
+        }
+    }
+});
+
 {#The adaptive display of Gantt chart is realized by these two functions#}
     gantt.attachEvent("onBeforeGanttRender", function(){
-   var range = gantt.getSubtaskDates();
-   var scaleUnit = gantt.getState().scale_unit;
-   if(range.start_date && range.end_date){
+    var range = gantt.getSubtaskDates();
+    var scaleUnit = gantt.getState().scale_unit;
+    if(range.start_date && range.end_date){
      gantt.config.start_date = gantt.calculateEndDate(range.start_date, -4, scaleUnit);
      gantt.config.end_date = gantt.calculateEndDate(range.end_date, 5, scaleUnit);
    }
 });
 
     gantt.attachEvent("onTaskDrag", function(id, mode, task, original){
- var state = gantt.getState();
- var minDate = state.min_date,
-     maxDate = state.max_date;
+        var state = gantt.getState();
+        var minDate = state.min_date,
+        maxDate = state.max_date;
 
- var scaleStep=gantt.date.add(new Date(),state.scale_step,state.scale_unit)-new Date();
+    var scaleStep=gantt.date.add(new Date(),state.scale_step,state.scale_unit)-new Date();
 
- var showDate,
-  repaint = false;
-  if(mode == "resize" || mode == "move"){
-    if(Math.abs(task.start_date - minDate) < scaleStep){
-      showDate = task.start_date;
-      repaint = true;
+    var showDate,
+    repaint = false;
+    if(mode == "resize" || mode == "move"){
+        if(Math.abs(task.start_date - minDate) < scaleStep){
+        showDate = task.start_date;
+        repaint = true;
 
     }else if(Math.abs(task.end_date - maxDate) < scaleStep){
-      showDate = task.end_date;
-      repaint = true;
+        showDate = task.end_date;
+        repaint = true;
     }
 
     if(repaint){
-      gantt.render();
-      gantt.showDate(showDate);
+        gantt.render();
+        gantt.showDate(showDate);
     }
   }
 });
 gantt.config.show_tasks_outside_timescale = true;
 
 
-        gantt.config.date_format = "%d-%m-%Y %H:%i";
+    gantt.config.date_format = "%d-%m-%Y %H:%i";
 
     gantt.config.open_tree_initially = true;
     gantt.init("gantt_here");
