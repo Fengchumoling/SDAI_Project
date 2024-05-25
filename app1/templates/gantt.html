@@ -9,6 +9,7 @@
         <div id="gantt_here" style='width:100%; height:500px;'>
         </div>
         <script>
+{#Customize the Gantt chart position column here#}
         gantt.config.columns =  [
     {name:"text",       label:"Task name",  tree:true, width:"*" },
     {name:"Holder",     label:"Holder",     align:"center" },
@@ -18,14 +19,7 @@
     {name: "add", width: 44 }
 ];
 
-        var opts = [
-    {key:1, label: "0%", value: 0},
-    {key:2, label: "25%", value: 0.25},
-    {key:3, label: "50%", value: 0.50},
-    {key:4, label: "75%", value: 0.75},
-    {key:5, label: "100%", value: 1}
-];
-
+{#Customize the Gantt chart lightbox here, adding the holder and progress properties#}
     gantt.config.lightbox.sections=[
     {name:"description", height:70, map_to:"text", type:"textarea", focus:true},
     {name:"holder", height:30, map_to:"Holder", type:"textarea"},
@@ -33,12 +27,13 @@
     {name:"time", height:72, map_to:"auto", type:"duration"}
 ];
 
+{#Make user-friendly progress input easier by creating a function to customize the range scrollbar#}
     gantt.templates.progress_text = function(start, end, task) {
         return "<div class='gantt_task_progress_text'>" + Math.round(task.progress * 100) + "%</div>";
     };
 
 
-var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range' min='0' max='100' value='0' step='1' style='width:100%;' oninput='outputUpdate(value)'></div>" +
+    var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range' min='0' max='100' value='0' step='1' style='width:100%;' oninput='outputUpdate(value)'></div>" +
     "<span id='output'>0%</span>"
 
     function outputUpdate(value) {document.getElementById('output').innerText = value + '%';};
@@ -68,7 +63,7 @@ var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range'
             return true;
         });
 
-
+{#Name the new properties in the lightbox#}
     gantt.locale.labels.section_holder = "Holder";
     gantt.locale.labels.section_progress = "Progress";
 
@@ -77,7 +72,7 @@ var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range'
     {unit: "day", step:1, format: "%j, %D"}
 ];
 
-
+{#The adaptive display of Gantt chart is realized by these two functions#}
     gantt.attachEvent("onBeforeGanttRender", function(){
    var range = gantt.getSubtaskDates();
    var scaleUnit = gantt.getState().scale_unit;
