@@ -112,8 +112,15 @@ gantt.config.show_tasks_outside_timescale = true;
 
         gantt.config.date_format = "%Y-%m-%d %H:%i";
 
-        gantt.config.open_tree_initially = true;
-        gantt.init("gantt_here");
-        </script>
-    </body>
+    gantt.config.open_tree_initially = true;
+    gantt.init("gantt_here");
+    gantt.load("/getGanttData/")
+
+    var dp = gantt.createDataProcessor({
+        url: "/changeGanttData/",
+        mode: "GET",
+        deleteAfterConfirmation: true
+    });
+</script>
+</body>
 </html>

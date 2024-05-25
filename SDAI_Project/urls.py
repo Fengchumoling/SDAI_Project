@@ -17,15 +17,18 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-
 from app1.views import *
-from app1.views import wbs_tool, get_wbs_data
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
     path("index/", index),
     path("d3j/", d3j),
+    path("gantt/", gantt),
+
+    path("getGanttData/", getGanttData),
+    path("changeGanttData/", changeGanttData),
     path("gantt/",gantt),
     path('wbs_tool/', wbs_tool, name='wbs_tool'),
     path('get-wbs-data/', get_wbs_data, name='get_wbs_data')
