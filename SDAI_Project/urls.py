@@ -23,13 +23,31 @@ from rest_framework.urlpatterns import format_suffix_patterns
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    path("index/", index),
+    path("index/", index, name="index"),
     path("d3j/", d3j),
     path("gantt/", gantt),
 
-    path("getGanttData/", getGanttData),
-    path("changeGanttData/", changeGanttData),
-    path("gantt/",gantt),
+    path("getGanttData/", get_gantt_data),
+    path("changeGanttData/", change_gantt_data),
+    path("gantt/", gantt, name='gantt'),
     path('wbs_tool/', wbs_tool, name='wbs_tool'),
-    path('get-wbs-data/', get_wbs_data, name='get_wbs_data')
+    path('get-wbs-data/', get_wbs_data, name='get_wbs_data'),
+
+    # User Management System
+    path("register/", register, name='register'),
+    path("login/", login_view, name='login'),
+
+    # Project management
+    path("project/create", project_create),
+    path("project/", get_project),
+    path("project/<int:pid>", project_detail, name='project_detail'),
+
+    # Group Management
+    path("group/<int:gid>/", group_detail, name='group_detail'),
+
+
+    # Chat Function
+    path("chat/", chat_index, name='chat_index'),
+    path("chat/<str:room_name>", chat_room, name='chat_room'),
+
 ]

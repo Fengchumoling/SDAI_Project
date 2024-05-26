@@ -26,12 +26,16 @@ SECRET_KEY = "django-insecure-3pjj*d_j0&=-$#d#hwevwuktern!bv=#5n4ib+omvkc$s&f5i%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# SESSION_COOKIE_SECURE = False
+# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -39,7 +43,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "app1.apps.App1Config",
+    'channels',
 ]
+
+ASGI_APPLICATION = 'SDAI_Project.asgi.application'
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -80,6 +88,15 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'PMS',
+    #     'USER': 'root',  # 输入自己的
+    #     # 'PASSWORD': '20030613ZSYzsy.',  # 输入自己的
+    #     'PASSWORD': '',  # 输入自己的
+    #     'HOST': '127.0.0.1',
+    #     'PORT': 3306,
+    # }
 }
 
 
@@ -101,6 +118,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# PASSWORD_HASHERS = [
+#     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+#     'django.contrib.auth.hashers.Argon2PasswordHasher',
+#     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+# ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -124,3 +146,13 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "app1/static")]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+            # 或"hosts": [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')],
+        },
+    },
+}
