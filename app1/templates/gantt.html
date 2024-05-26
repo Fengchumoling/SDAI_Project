@@ -9,6 +9,7 @@
         <div id="gantt_here" style='width:100%; height:500px;'>
         </div>
         <script>
+{#Customize the Gantt chart position column here#}
         gantt.config.columns =  [
     {name:"text",       label:"Task name",  tree:true, width:"*" },
     {name:"Holder",     label:"Holder",     align:"center" },
@@ -18,19 +19,60 @@
     {name: "add", width: 44 }
 ];
 
+{#Customize the Gantt chart lightbox here, adding the holder and progress properties#}
     gantt.config.lightbox.sections=[
     {name:"description", height:70, map_to:"text", type:"textarea", focus:true},
     {name:"holder", height:30, map_to:"Holder", type:"textarea"},
+    {name:"progress", height:30, map_to:"progress", type: "progress"},
     {name:"time", height:72, map_to:"auto", type:"duration"}
 ];
 
+{#Make user-friendly progress input easier by creating a function to customize the range scrollbar#}
+    gantt.templates.progress_text = function(start, end, task) {
+        return "<div class='gantt_task_progress_text'>" + Math.round(task.progress * 100) + "%</div>";
+    };
+
+
+    var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range' min='0' max='100' value='0' step='1' style='width:100%;' oninput='outputUpdate(value)'></div>" +
+    "<span id='output'>0%</span>"
+
+    function outputUpdate(value) {document.getElementById('output').innerText = value + '%';};
+
+    gantt.form_blocks["progress"] = {
+
+            render: function(sns) {
+                return range
+            },
+            set_value: function(node, value, task) {
+                node.getElementsByTagName("input")[0].value = value * 100;
+            },
+            get_value: function(node, task) {
+                return node.getElementsByTagName("input")[0].value / 100;
+            },
+            focus: function(node) {
+                var a = node.getElementsByTagName("input")[0];
+                a.focus();
+                a.select();
+            }
+        };
+
+        gantt.attachEvent("onLightboxSave", function(id, task, is_new) {
+            var progress = task.progress;
+            gantt.getTask(id).progress = progress;
+            gantt.updateTask(id);
+            return true;
+        });
+
+{#Name the new properties in the lightbox#}
     gantt.locale.labels.section_holder = "Holder";
+    gantt.locale.labels.section_progress = "Progress";
 
     gantt.config.scales = [
     {unit: "month", step: 1, format: "%F, %Y"},
     {unit: "day", step:1, format: "%j, %D"}
 ];
 
+{#The adaptive display of Gantt chart is realized by these two functions#}
     gantt.attachEvent("onBeforeGanttRender", function(){
    var range = gantt.getSubtaskDates();
    var scaleUnit = gantt.getState().scale_unit;

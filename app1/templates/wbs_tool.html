@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WBS Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.8/themes/default/style.min.css" />
+</head>
+<body>
+    <div id="wbs-tree"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.8/jstree.min.js"></script>
+    <script>
+        $(function() {
+            $('#wbs-tree').jstree({
+                'core' : {
+                    'data' : function (obj, callback) {
+                        $.ajax({
+                            url: '/get-wbs-data/',
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function (data) {
+                                callback.call(this, data);
+                            }
+                        });
+                    }
+                },
+                "plugins" : [ "wholerow", "types" ]
+            });
+        });
+    </script>
+</body>
+</html>
