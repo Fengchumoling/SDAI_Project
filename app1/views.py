@@ -3,7 +3,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import WBSElement
+from django.views import View
 
+import hashlib
 
 # Create your views here.
 
@@ -22,9 +24,9 @@ def getGanttData(request):
     print("API")
     data = {
         "tasks": [
-            {"id": 1, "text": "Project #1", "start_date": "01-04-2020", "duration": 18},
-            {"id": 2, "text": "Task #1", "start_date": "02-04-2020", "duration": 8, "parent": 1},
-            {"id": 3, "text": "Task #2", "start_date": "11-04-2020", "duration": 8, "parent": 1}
+            {"id": 1, "text": "Project #1", "start_date": "01-04-2024", "duration": 18, 'progress': 0.5},
+            {"id": 2, "text": "Task #1", "start_date": "02-04-2024", "duration": 8, "parent": 1, 'progress': 0.4},
+            {"id": 3, "text": "Task #2", "start_date": "11-04-2024", "duration": 8, "parent": 1, 'progress': 1},
         ],
         "links": [
             {"id": 1, "source": 1, "target": 2, "type": "1"},
@@ -56,3 +58,13 @@ def get_wbs_data(request):
 
 def wbs_tool(request):
     return render(request, 'wbs_tool.html')
+
+def chat_index(request):
+    return render(request, 'chat_index.html')
+
+
+def room(request, room_name):
+    # room_name = hashlib.md5(room_name.encode()).hexdigest()
+    return render(request, 'room.html', {
+        'room_name': room_name,
+    })
