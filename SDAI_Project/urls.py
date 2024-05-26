@@ -45,4 +45,9 @@ urlpatterns = [
     # Group Management
     path("group/<int:gid>/", group_detail, name='group_detail'),
 
+
+    # Chat Function
+    path("chat/", chat_index, name='chat_index'),
+    path("chat/<str:room_name>", chat_room, name='chat_room'),
+
 ]

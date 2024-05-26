@@ -185,6 +185,7 @@ def login_view(request):
         return render(request, 'login.html')
 
 
+# Project Management
 def project_create(request):
     if request.method == 'POST':
         project_name = request.POST['project_name']
@@ -228,3 +229,16 @@ def project_detail(request, pid):
 
 def group_detail(request, gid):
     return HttpResponse('This is the group detail view')
+
+
+# Chat Function
+
+def chat_index(request):
+    return render(request, 'chat_index.html')
+
+
+def chat_room(request, room_name):
+    # room_name = hashlib.md5(room_name.encode()).hexdigest()
+    return render(request, 'chat_room.html', {
+        'room_name': room_name,
+    })

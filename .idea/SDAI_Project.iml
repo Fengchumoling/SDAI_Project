@@ -23,6 +23,13 @@
     <orderEntry type="library" name="jstree" level="application" />
     <orderEntry type="library" name="jquery" level="application" />
   </component>
+  <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/otherFiles" />
+      </list>
+    </option>
+  </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
   </component>
