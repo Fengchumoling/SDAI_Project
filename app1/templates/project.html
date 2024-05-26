@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Your Groups and Projects Here</h1>
+
+{% for group, project in group_projects %}
+    <h2>{{ group.name }}</h2>
+    <ul>
+        <li>{{ project.name }} <a href="{% url 'project_detail' project.id %}"><button>Go to Project</button></a></li>
+    </ul>
+    <a href="{% url 'group_detail' group.id %}"><button>Go to Group</button></a>
+{% endfor %}
+
+</body>
+</html>

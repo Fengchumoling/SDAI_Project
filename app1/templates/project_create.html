@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Project</title>
+    <link rel="stylesheet" href={% static 'plugins/bootstrap-3.4.1-dist/css/bootstrap.min.css' %}>
+</head>
+<body>
+<h2>Create Project</h2>
+
+<form class="form-inline" method="post" action="/project/create">
+    {% csrf_token %}
+    <div class="form-group">
+        <label class="sr-only" for="project_name">Project Name</label>
+        <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name">
+    </div>
+    <div class="form-group">
+        <label class="sr-only" for="group_name">Group Name</label>
+        <input type="text" class="form-control" id="group_name" name="group_name" placeholder="Group Name">
+    </div>
+    <button type="submit" class="btn btn-default">Create</button>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</form>
+
+</body>
+</html>

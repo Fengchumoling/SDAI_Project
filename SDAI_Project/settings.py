@@ -26,6 +26,9 @@ SECRET_KEY = "django-insecure-3pjj*d_j0&=-$#d#hwevwuktern!bv=#5n4ib+omvkc$s&f5i%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# SESSION_COOKIE_SECURE = False
+# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 ALLOWED_HOSTS = []
 
 
@@ -101,6 +104,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# PASSWORD_HASHERS = [
+#     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+#     'django.contrib.auth.hashers.Argon2PasswordHasher',
+#     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+# ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
