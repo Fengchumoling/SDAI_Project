@@ -1,14 +1,77 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Register</title>
+    <link rel="stylesheet" href={% static 'plugins/bootstrap-3.4.1-dist/css/bootstrap.min.css' %}>
 </head>
 <body>
-    <h2>Register</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
+<h2>Register</h2>
+{#    <form method="post">#}
+{#        {% csrf_token %}#}
+{#        {{ form.as_p }}#}
+{#        <button type="submit">Register</button>#}
+{#    </form>#}
+<form class="form-inline" method="post" action="/register/">
+    {% csrf_token %}
+    <div class="form-group">
+        <label class="sr-only" for="email">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only" for="sms">sms code</label>
+        <input type="text" class="form-control" id="sms" name="sms" placeholder="sms code">
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only" for="username">username</label>
+        <input type="text" class="form-control" id="username" name="username" placeholder="username">
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only" for="password1">password</label>
+        <input type="password" class="form-control" id="password1" name="password1" placeholder="password">
+    </div>
+    <div class="form-group">
+        <label class="sr-only" for="password2">confirm password</label>
+        <input type="password" class="form-control" id="password2" name="password2" placeholder="confirm password">
+    </div>
+    <button type="submit" class="btn btn-default">Register</button>
+
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</form>
+
+<button class="btn btn-default" type="button" id="smsbtn">Send sms code</button>
+
+
+<script src="{% static "js/jquery-3.7.1.min.js" %}"></script>
+<script>
+    $('#smsbtn').click(function () {
+        var emailValue = $('#email').val();
+
+        $.ajax({
+            url: '/sendsms/',
+            method: 'GET', // 或者 'GET'
+            data: {email: emailValue},
+            success: function (response) {
+                console.log('短信发送成功！');
+            },
+            error: function (xhr, status, error) {
+                console.error('短信发送失败:', error);
+            }
+        });
+
+        $('#smsbtn').prop('disabled', true).css('background-color', '#ccc');
+
+        setTimeout(function () {
+            $('#smsbtn').prop('disabled', false).css('background-color', '#fff');
+        }, 60000); // 一分钟
+    });
+
+</script>
 </body>
 </html>

@@ -1,138 +1,179 @@
-<html>
-    <head>
-        {% load static %}
-        <script src="{% static "plugins/codebase/dhtmlxgantt.js" %}" type="text/javascript">
-        </script>
-        <link rel="stylesheet" href="{% static "plugins/codebase/dhtmlxgantt.css" %}" />
-        <style>
-        .gantt_task_line{
-        border-color: rgba(0, 0, 0, 0.25);
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="{% static "plugins/codebase/dhtmlxgantt.js" %}" type="text/javascript">
+    </script>
+    <script src="{% static "plugins/js.cookie.min.js" %}" type="text/javascript"></script>
+    <link rel="stylesheet" href="{% static "plugins/codebase/dhtmlxgantt.css" %}"/>
+    <style>
+        .gantt_task_line {
+            border-color: rgba(0, 0, 0, 0.25);
         }
+
         .gantt_task_line .gantt_task_progress {
             background-color: rgba(0, 0, 0, 0.25);
         }
+
         .important {
-            {#color: #ff5956;#}
-            background-color: #ff5956; /* Change to red */
+        {#color: #ff5956;#} background-color: #ff5956; /* Change to red */
         }
 
         .important .gantt_task_progress {
             background-color: red;
         }
-        </style>
-    </head>
-    <body>
-        <div id="gantt_here" style='width:100%; height:500px;'>
-        </div>
-        <script>
+    </style>
+</head>
+<body>
+<div id="gantt_here" style='width:100%; height:500px;'>
+</div>
+{#{% csrf_token %}#}
+<script>
+
+    const csrftoken = Cookies.get('csrftoken');
+
+    var opts;
+
+
+    async function fetchData() {
+        try {
+            const response = await fetch('/getMemberData/');
+            const data = await response.json();
+            opts = data;
+
+            initGanttChat();
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
+        }
+    }
+
 
     gantt.plugins({
         marker: true
     });
-            
-    gantt.init("gantt_here");
-    gantt.load("/getGanttData/");
 
-{#Customize the Gantt chart position column here#}
-        gantt.config.columns =  [
-    {name:"text",       label:"Task name",  tree:true, width:"*" },
-    {name:"Holder",     label:"Holder",     align:"center" },
-    {name:"start_date", label:"Start time", align:"center" },
-    {name:"end_date",   label:"End date",   align:"center" },
-    {name:"progress",   label:"Progress",   align:"center" },
-    {name: "add", width: 44 }
-];
+    function initGanttChat() {
+        gantt.init("gantt_here");
+        gantt.load("/getGanttData/");
 
-{#Customize the Gantt chart lightbox here, adding the holder and progress properties#}
-    gantt.config.lightbox.sections=[
-    {name:"description", height:70, map_to:"text", type:"textarea", focus:true},
-    {name:"holder", height:30, map_to:"Holder", type:"textarea"},
-    {name:"progress", height:30, map_to:"progress", type: "progress"},
-    {name:"time", height:72, map_to:"auto", type:"duration"}
-];
+        {#Customize the Gantt chart position column here#}
+        gantt.config.columns = [
+            {name: "text", label: "Task name", tree: true, width: "*"},
+            {name: "Holder", label: "Holder", align: "center"},
+            {name: "start_date", label: "Start time", align: "center"},
+            {name: "end_date", label: "End date", align: "center"},
+            {name: "progress", label: "Progress", align: "center"},
+            {name: "add", width: 44}
+        ];
 
-{#Make user-friendly progress input easier by creating a function to customize the range scrollbar#}
-    gantt.templates.progress_text = function(start, end, task) {
+        {#Customize the Gantt chart lightbox here, adding the Holder and progress properties#}
+        gantt.config.lightbox.sections = [
+            {name: "description", height: 70, map_to: "text", type: "textarea", focus: true},
+            {name: "Holder", height: 30, map_to: "Holder", type: "select", options: opts},
+            {name: "progress", height: 30, map_to: "progress", type: "progress"},
+            {name: "time", height: 72, map_to: "auto", type: "duration"}
+        ];
+    }
+
+    fetchData();
+
+    var dp = gantt.createDataProcessor({
+        url: "/changeGanttData/",
+        mode: "POST",
+        deleteAfterConfirmation: true,
+    });
+
+    dp.attachEvent("onBeforeUpdate", function (id, state, data) {
+        data.csrfmiddlewaretoken = csrftoken;
+        return true;
+    });
+
+
+    {#Make user-friendly progress input easier by creating a function to customize the range scrollbar#}
+    gantt.templates.progress_text = function (start, end, task) {
         return "<div class='gantt_task_progress_text'>" + Math.round(task.progress * 100) + "%</div>";
     };
 
 
     var range = "<div class='dhx_cal_ltext' style='height:30px;'><input type='range' min='0' max='100' value='0' step='1' style='width:100%;' oninput='outputUpdate(value)'></div>" +
-    "<span id='output'>0%</span>"
+        "<span id='output'>0%</span>"
 
-    function outputUpdate(value) {document.getElementById('output').innerText = value + '%';};
+    function outputUpdate(value) {
+        document.getElementById('output').innerText = value + '%';
+    };
 
     gantt.form_blocks["progress"] = {
 
-            render: function(sns) {
-                return range
-            },
-            set_value: function(node, value, task) {
-                node.getElementsByTagName("input")[0].value = value * 100;
-            },
-            get_value: function(node, task) {
-                return node.getElementsByTagName("input")[0].value / 100;
-            },
-            focus: function(node) {
-                var a = node.getElementsByTagName("input")[0];
-                a.focus();
-                a.select();
-            }
-        };
+        render: function (sns) {
+            return range
+        },
+        set_value: function (node, value, task) {
+            node.getElementsByTagName("input")[0].value = value * 100;
+        },
+        get_value: function (node, task) {
+            return node.getElementsByTagName("input")[0].value / 100;
+        },
+        focus: function (node) {
+            var a = node.getElementsByTagName("input")[0];
+            a.focus();
+            a.select();
+        }
+    };
 
-        gantt.attachEvent("onLightboxSave", function(id, task, is_new) {
-            var progress = task.progress;
-            gantt.getTask(id).progress = progress;
-            gantt.updateTask(id);
-            return true;
-        });
+    gantt.attachEvent("onLightboxSave", function (id, task, is_new) {
+        var progress = task.progress;
+        gantt.getTask(id).progress = progress;
+        gantt.updateTask(id);
+        return true;
+    });
 
-{#Name the new properties in the lightbox#}
-    gantt.locale.labels.section_holder = "Holder";
+    {#Name the new properties in the lightbox#}
+    gantt.locale.labels.section_Holder = "Holder";
     gantt.locale.labels.section_progress = "Progress";
 
     gantt.config.scales = [
-    {unit: "month", step: 1, format: "%F, %Y"},
-    {unit: "day", step:1, format: "%j, %D"}
-];
+        {unit: "month", step: 1, format: "%F, %Y"},
+        {unit: "day", step: 1, format: "%j, %D"}
+    ];
 
 
-{#The adaptive display of Gantt chart is realized by these two functions#}
-    gantt.attachEvent("onBeforeGanttRender", function(){
-    var range = gantt.getSubtaskDates();
-    var scaleUnit = gantt.getState().scale_unit;
-    if(range.start_date && range.end_date){
-     gantt.config.start_date = gantt.calculateEndDate(range.start_date, -4, scaleUnit);
-     gantt.config.end_date = gantt.calculateEndDate(range.end_date, 5, scaleUnit);
-   }
-});
+    {#The adaptive display of Gantt chart is realized by these two functions#}
+    gantt.attachEvent("onBeforeGanttRender", function () {
+        var range = gantt.getSubtaskDates();
+        var scaleUnit = gantt.getState().scale_unit;
+        if (range.start_date && range.end_date) {
+            gantt.config.start_date = gantt.calculateEndDate(range.start_date, -4, scaleUnit);
+            gantt.config.end_date = gantt.calculateEndDate(range.end_date, 5, scaleUnit);
+        }
+    });
 
-    gantt.attachEvent("onTaskDrag", function(id, mode, task, original){
+    gantt.attachEvent("onTaskDrag", function (id, mode, task, original) {
         var state = gantt.getState();
         var minDate = state.min_date,
-        maxDate = state.max_date;
+            maxDate = state.max_date;
 
-    var scaleStep=gantt.date.add(new Date(),state.scale_step,state.scale_unit)-new Date();
+        var scaleStep = gantt.date.add(new Date(), state.scale_step, state.scale_unit) - new Date();
 
-    var showDate,
-    repaint = false;
-    if(mode == "resize" || mode == "move"){
-        if(Math.abs(task.start_date - minDate) < scaleStep){
-        showDate = task.start_date;
-        repaint = true;
+        var showDate,
+            repaint = false;
+        if (mode == "resize" || mode == "move") {
+            if (Math.abs(task.start_date - minDate) < scaleStep) {
+                showDate = task.start_date;
+                repaint = true;
 
-    }else if(Math.abs(task.end_date - maxDate) < scaleStep){
-        showDate = task.end_date;
-        repaint = true;
-    }
+            } else if (Math.abs(task.end_date - maxDate) < scaleStep) {
+                showDate = task.end_date;
+                repaint = true;
+            }
 
-    if(repaint){
-        gantt.render();
-        gantt.showDate(showDate);
-    }
-  }
-});
-gantt.config.show_tasks_outside_timescale = true;
+            if (repaint) {
+                gantt.render();
+                gantt.showDate(showDate);
+            }
+        }
+    });
+    gantt.config.show_tasks_outside_timescale = true;
 
 
     gantt.config.date_format = "%d-%m-%Y %H:%i";
@@ -140,31 +181,23 @@ gantt.config.show_tasks_outside_timescale = true;
     gantt.config.open_tree_initially = true;
 
 
-
-
-
     var dateToStr = gantt.date.date_to_str(gantt.config.task_date);
-var markerId = gantt.addMarker({
-    start_date: new Date(), //a Date object that sets the marker's date
-    css: "today", //a CSS class applied to the marker
-    text: "Now", //the marker title
-    title: dateToStr( new Date()) // the marker's tooltip
-});
-gantt.getMarker(markerId);
-
-    var dp = gantt.createDataProcessor({
-        url: "/changeGanttData/",
-        mode: "GET",
-        deleteAfterConfirmation: true
+    var markerId = gantt.addMarker({
+        start_date: new Date(), //a Date object that sets the marker's date
+        css: "today", //a CSS class applied to the marker
+        text: "Now", //the marker title
+        title: dateToStr(new Date()) // the marker's tooltip
     });
+    gantt.getMarker(markerId);
 
-    gantt.templates.task_class = function(start,end,task){
-    if(task.progress < 1 && new Date(task.end_date) <= new Date()){
-        return "important";
-    }else{
-        return "";
-    }
-};
+
+    gantt.templates.task_class = function (start, end, task) {
+        if (task.progress < 1 && new Date(task.end_date) <= new Date()) {
+            return "important";
+        } else {
+            return "";
+        }
+    };
 
 
 </script>

@@ -16,7 +16,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -30,7 +29,6 @@ DEBUG = True
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -47,7 +45,6 @@ INSTALLED_APPS = [
 ]
 
 ASGI_APPLICATION = 'SDAI_Project.asgi.application'
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -79,7 +76,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "SDAI_Project.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -98,7 +94,6 @@ DATABASES = {
     #     'PORT': 3306,
     # }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -135,7 +130,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -156,3 +150,11 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+EMAIL_HOST = "smtp.qq.com"
+EmailPort = 25
+EMAIL_HOST_USER = "1690746478@qq.com"
+EMAIL_HOST_PASSWORD = "miuvlfgmhregebed"
+EMAIL_USE_TLS = True
+Email_From = EMAIL_HOST_USER
+email_title = "email register"

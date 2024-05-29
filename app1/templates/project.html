@@ -10,9 +10,14 @@
 {% for group, project in group_projects %}
     <h2>{{ group.name }}</h2>
     <ul>
-        <li>{{ project.name }} <a href="{% url 'project_detail' project.id %}"><button>Go to Project</button></a></li>
+        <li>{{ project.name }} <a href="{% url 'project_detail' project.id %}">
+            <button>Go to Project</button>
+        </a></li>
     </ul>
-    <a href="{% url 'group_detail' group.id %}"><button>Go to Group</button></a>
+
+    <a href="{% url 'group_detail' group.id %}">
+        <button>Go to Group</button>
+    </a>
 {% endfor %}
 
 </body>

@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     path("index/", index, name="index"),
+    path("", index, name="home"),
     path("d3j/", d3j),
     path("gantt/", gantt),
 
@@ -36,6 +37,8 @@ urlpatterns = [
     # User Management System
     path("register/", register, name='register'),
     path("login/", login_view, name='login'),
+    path("sendsms/", send_sms_code_view),
+
 
     # Project management
     path("project/create", project_create),
@@ -44,10 +47,12 @@ urlpatterns = [
 
     # Group Management
     path("group/<int:gid>/", group_detail, name='group_detail'),
+    path("getMemberData/", get_group_members, name='get_group_members'),
 
 
     # Chat Function
     path("chat/", chat_index, name='chat_index'),
-    path("chat/<str:room_name>", chat_room, name='chat_room'),
+    path("chat/<str:room_name>/", chat_room, name='chat_room'),
 
+    path("set/", once_task),
 ]
