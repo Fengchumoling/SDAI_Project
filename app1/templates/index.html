@@ -9,71 +9,90 @@
 </head>
 <body>
 <nav class="navbar navbar-default">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">SDAI</a>
-    </div>
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse"
+                    aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">SDAI</a>
+        </div>
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="navbar-collapse">
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">HOME</a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">HOME</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
 </nav>
 
 <div class="container-fluid">
-  <div class="row">
-      <!-- 侧边栏区域 -->
-    <div class="col-md-2 sidebar">
-      <ul class="nav nav-pills nav-stacked">
-        <li><a class="btn btn-default" href="/project/create" role="button">Create Projects</a></li>
-        <li><a class="btn btn-default" href="/project" role="button">My Projects</a></li>
-        <li><a class="btn btn-default" href="/register/" role="button">Register</a></li>
-        <li><a class="btn btn-default" href="/login/" role="button">Login</a></li>
+    <div class="row">
+        <!-- 侧边栏区域 -->
+        <div class="col-md-2 sidebar">
+            <ul class="nav nav-pills nav-stacked">
+                <li><a class="btn btn-default" href="/project/create" role="button">Create Projects</a></li>
+                <li><a class="btn btn-default" href="/project" role="button">My Projects</a></li>
+                <li><a class="btn btn-default" href="/register/" role="button">Register</a></li>
+                <li><a class="btn btn-default" href="/login/" role="button">Login</a></li>
 
-      </ul>
-    </div>
-      <!-- 主体区域 -->
-<div class="col-md-10 main-content">
-  <!-- 左右两个平分的区域 -->
-  <div class="row">
-    <!-- 左半边，用于展示甘特图 -->
-    <div class="col-md-6" id="gantt-chart">
-      <h2>Gantt Chart</h2>
-      <!-- 这里放置甘特图的内容 -->
-    </div>
+            </ul>
 
-    <!-- 右半边，用于展示报告 -->
-    <div class="col-md-6" id="report">
-      <h2>Report</h2>
-      <p>This is a simple report.</p>
-      <table class="table table-striped">
-        <!-- 表格内容 -->
-      </table>
-    </div>
-  </div>
-</div>
+            {#      项目和组#}
+            {% for group, project in group_projects %}
+                <h2>{{ group.name }}</h2>
+                <ul>
+                    <li>{{ project.name }} <a href="{% url 'project_detail' project.id %}">
+                        <button>Go to Project</button>
+                    </a></li>
+                </ul>
 
-  </div>
+                <a href="{% url 'group_detail' group.id %}">
+                    <button>Go to Group</button>
+                </a>
+            {% endfor %}
+
+        </div>
+
+
+        <!-- 主体区域 -->
+        <div class="col-md-10 main-content">
+            <!-- 左右两个平分的区域 -->
+            <div class="row">
+                <!-- 左半边，用于展示甘特图 -->
+                <div class="col-md-6" id="gantt-chart">
+                    <h2>Gantt Chart</h2>
+                    <!-- 这里放置甘特图的内容 -->
+                </div>
+
+                <!-- 右半边，用于展示报告 -->
+                <div class="col-md-6" id="report">
+                    <h2>Report</h2>
+                    <p>This is a simple report.</p>
+                    <table class="table table-striped">
+                        <!-- 表格内容 -->
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>

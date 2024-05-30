@@ -15,7 +15,9 @@ from django.core.mail import send_mail
 def index(request):
     # print(request.user)
     print(request.session['user_id'])
-    return render(request, 'index.html')
+    user_id = request.session['user_id']
+    group_projects = get_project_fun(user_id)
+    return render(request, 'index.html', {'group_projects': group_projects})
 
 
 def d3j(request):
@@ -245,8 +247,7 @@ def project_create(request):
         return render(request, 'project_create.html')
 
 
-def get_project(request):
-    user_id = request.session['user_id']
+def get_project_fun(user_id):
     user = User.objects.get(id=user_id)
     groups = user.members.all()
     group_projects = []
@@ -257,6 +258,12 @@ def get_project(request):
             # print(project)
             # group_projects.append((group, project, members))
             group_projects.append((group, project))
+    return group_projects
+
+
+def get_project(request):
+    user_id = request.session['user_id']
+    group_projects = get_project_fun(user_id)
     return render(request, 'project.html', {'group_projects': group_projects})
 
 
@@ -316,9 +323,6 @@ def once_task(request):
 
     # user = User.objects.create_user(email="test@a.com", name="test1", password="12345678")
     # request.session['user_id'] = user.id
-
-
-
 
     return redirect('index')
 
