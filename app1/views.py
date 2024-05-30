@@ -313,6 +313,13 @@ def once_task(request):
     # return redirect('index')
     # ss = send_sms_code("1656296953@qq.com")
     # return HttpResponse(ss)
+
+    # user = User.objects.create_user(email="test@a.com", name="test1", password="12345678")
+    # request.session['user_id'] = user.id
+
+
+
+
     return redirect('index')
 
 # Code miuvlfgmhregebed
