@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Group</title>
+    <link rel="stylesheet" href="{% static 'css/group.css' %}">
+</head>
+<body>
+<h2>{{ group.name }}</h2>
+<h3>Control {{ control.name }}</h3>
+
+<button id="addmember">Add Member</button>
+<ul>
+    {% for member in members %}
+        <li>{{ member.name }} {{ member.email }}</li>
+    {% endfor %}
+</ul>
+
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <span class="close">&times;</span>
+        <h2>输入邮箱</h2>
+        <input type="text" id="member-email" placeholder="邮箱">
+        <button id="confirm">确认</button>
+        <button id="cancel">取消</button>
+    </div>
+</div>
+
+
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        // 显示弹窗
+        $('#addmember').click(function () {
+            $('#popup').show();
+        });
+
+        // 关闭弹窗
+        $('.close, #cancel').click(function () {
+            $('#popup').hide();
+            $('#member-email').val(''); // 清空输入框
+        });
+
+        // 确认按钮事件
+        $('#confirm').click(function () {
+            var emailValue = $('#member-email').val();
+
+            if (emailValue) {
+                // 获取当前网址并生成目标 URL
+                var currentUrl = window.location.href;
+                var targetUrl = currentUrl + 'addmember';
+
+                // 发送 AJAX 请求
+                $.ajax({
+                    url: targetUrl,
+                    method: 'POST', // 或者 'GET'
+                    data: {email: emailValue},
+                    success: function (response) {
+                        if (response.msg === 'success') {
+                            alert('添加成功');
+                        } else {
+                            alert('添加失败: ' + response.msg);
+                        }
+                        $('#popup').hide();
+                        $('#member-email').val(''); // 清空输入框
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('请求失败:', error);
+                        alert('请求失败');
+                    }
+                });
+            } else {
+                alert('请输入有效的邮箱');
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

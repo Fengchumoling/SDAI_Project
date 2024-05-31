@@ -47,6 +47,7 @@ urlpatterns = [
 
     # Group Management
     path("group/<int:gid>/", group_detail, name='group_detail'),
+    path("group/<int:gid>/addmember", add_group_member),
     path("getMemberData/", get_group_members, name='get_group_members'),
 
 

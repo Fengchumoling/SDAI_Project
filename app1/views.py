@@ -277,7 +277,14 @@ def project_detail(request, pid):
 
 
 def group_detail(request, gid):
-    return HttpResponse('This is the group detail view')
+    group = Group.objects.get(id=gid)
+    control = group.control
+    members = group.members.all()
+    return render(request, 'group.html', {'group': group, 'control': control, 'members': members})
+
+    # return HttpResponse('This is the group detail view')
+
+
 
 
 def get_group_members(request):
@@ -296,6 +303,10 @@ def get_group_members(request):
     #     {'key': 'a@c.com', 'label': 'third user'},
     # ]
     return JsonResponse(members_array, safe=False)
+
+
+def add_group_member(request):
+    return HttpResponse("success")
 
 
 # Chat Function
