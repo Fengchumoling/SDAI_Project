@@ -13,11 +13,21 @@ from django.core.mail import send_mail
 # Create your views here.
 
 def index(request):
-    # print(request.user)
-    print(request.session['user_id'])
+    # print(request.session['user_id'])
+    print(request.user)
+
     user_id = request.session['user_id']
     group_projects = get_project_fun(user_id)
-    return render(request, 'index.html', {'group_projects': group_projects})
+    user = User.objects.get(id=user_id)
+    request.user = user
+    print(request.user)
+    user_tasks = user.tasks.all()
+    context = {
+        'group_projects': group_projects,
+        'user': user,
+        'user_tasks': user_tasks,
+    }
+    return render(request, 'index.html', context=context)
 
 
 def d3j(request):
@@ -94,21 +104,26 @@ def change_gantt_data(request):
 
     project_id = request.session['project_id']
     project = Project.objects.get(id=project_id)
+    user_id = request.session['user_id']
+    user = User.objects.get(id=user_id)
 
     if gantt_mode == "tasks":
-        id = request.GET.get('id')
-        start_date_str = request.GET.get('start_date')
-        text = request.GET.get('text')
-        duration = request.GET.get('duration')
-        end_date_str = request.GET.get('end_date')
-        progress = request.GET.get('progress')
-        parent = request.GET.get('parent')
-        holder = request.GET.get('Holder')
-        nativeeditor_status = request.GET.get('!nativeeditor_status')
+        id = request.POST.get('id')
+        start_date_str = request.POST.get('start_date')
+        text = request.POST.get('text')
+        duration = request.POST.get('duration')
+        end_date_str = request.POST.get('end_date')
+        progress = request.POST.get('progress')
+        parent = request.POST.get('parent')
+        holder = user
+        nativeeditor_status = request.POST.get('!nativeeditor_status')
         print(id)
 
-        # start_date = datetime.strptime(start_date_str, '%d-%m-%Y %H:%M')
-        # end_date = datetime.strptime(end_date_str, '%d-%m-%Y %H:%M')
+        start_date = datetime.strptime(start_date_str, '%d-%m-%Y %H:%M')
+        end_date = datetime.strptime(end_date_str, '%d-%m-%Y %H:%M')
+
+        print(id, start_date_str, start_date, end_date_str, end_date, text, duration, parent, holder,
+              nativeeditor_status)
 
         # task = Task.objects.create(
         #     id=id,
@@ -118,7 +133,8 @@ def change_gantt_data(request):
         #     duration=duration,
         #     progress=progress,
         #     parent=parent,
-        #     project=project
+        #     project=project,
+        #     holder=holder
         # )
 
         print(nativeeditor_status)
@@ -215,6 +231,7 @@ def login_view(request):
         if user.check_password(password):
             # print("Login Successful")
             # login(request, user)
+            request.user = user
             request.session['user_id'] = user.id
             # print(request.user.name, request.user.id)
             return redirect('index')
@@ -280,11 +297,14 @@ def group_detail(request, gid):
     group = Group.objects.get(id=gid)
     control = group.control
     members = group.members.all()
-    return render(request, 'group.html', {'group': group, 'control': control, 'members': members})
+    context = {
+        'group': group,
+        'control': control,
+        'members': members
+    }
+    return render(request, 'group.html', context=context)
 
     # return HttpResponse('This is the group detail view')
-
-
 
 
 def get_group_members(request):
@@ -334,6 +354,28 @@ def once_task(request):
 
     # user = User.objects.create_user(email="test@a.com", name="test1", password="12345678")
     # request.session['user_id'] = user.id
+
+    # user1 = User.objects.create_user(email="test1@a.com", name="test1", password="12345678")
+    # user2 = User.objects.create_user(email="test2@a.com", name="test2", password="12345678")
+    # user3 = User.objects.create_user(email="test3@a.com", name="test3", password="12345678")
+    # user4 = User.objects.create_user(email="test4@a.com", name="test4", password="12345678")
+    # user5 = User.objects.create_user(email="test5@a.com", name="test5", password="12345678")
+
+    # request.session['user_id'] = user1.id
+
+    # user1 = User.objects.get(id=request.session['user_id'])
+    # user2 = User.objects.get(id=2)
+    # user3 = User.objects.get(id=3)
+    # user4 = User.objects.get(id=4)
+    # user5 = User.objects.get(id=5)
+    #
+    # group1 = Group.objects.create(name="First Group", control=user1)
+    # group1.members.add(user1, user2, user3)
+    # project1 = Project.objects.create(name="User Management System", group=group1)
+    #
+    # group2 = Group.objects.create(name="Group 2", control=user1)
+    # group2.members.add(user1, user4, user5)
+    # project2 = Project.objects.create(name="Robot System", group=group2)
 
     return redirect('index')
 

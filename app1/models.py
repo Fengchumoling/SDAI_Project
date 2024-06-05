@@ -74,7 +74,7 @@ class Project(models.Model):
 
 
 class Task(models.Model):
-    id = models.AutoField(primary_key=True, editable=False)
+    id = models.BigAutoField(primary_key=True, editable=False)
     text = models.CharField(blank=True, max_length=100)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
@@ -82,6 +82,7 @@ class Task(models.Model):
     progress = models.FloatField()
     parent = models.CharField(max_length=100)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    holder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
 
 
 class Link(models.Model):

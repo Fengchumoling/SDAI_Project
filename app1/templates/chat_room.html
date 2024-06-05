@@ -1,60 +1,110 @@
- <!DOCTYPE html>
+{% load static %}
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8"/>
     <title>Chat Room</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    {{ room_name|json_script:"room-name" }}
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse"
+                    aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">SDAI</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">HOME</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Register/Login<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/register/">Register</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/login/">Login</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
+    <div class="row">
+        <textarea class="form-control" id="chat-log" cols="100" rows="20"></textarea><br>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <input class="form-control" id="chat-message-input" type="text" size="60">
+        </div>
+        <div class="col-md-4 col-md-offset-2">
+            <input class="btn btn-default" id="chat-message-submit" type="button" value="Send">
+        </div>
+    </div>
+</div>
+{{ room_name|json_script:"room-name" }}
+
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-3.4.1-dist/js/bootstrap.min.js' %}"></script>
 <script>
-        // 获取房间名
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+    // 获取房间名
+    const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
-        // 根据roomName拼接websocket请求地址，建立长连接
-        //  请求url地址为/ws/chat/<room_name>/
-        const wss_protocol = (window.location.protocol == 'https:') ? 'wss://': 'ws://';
-        const chatSocket = new WebSocket(
-             wss_protocol + window.location.host + '/ws/chat/'  + roomName + '/'
-             );
+    // 根据roomName拼接websocket请求地址，建立长连接
+    //  请求url地址为/ws/chat/<room_name>/
+    const wss_protocol = (window.location.protocol == 'https:') ? 'wss://' : 'ws://';
+    const chatSocket = new WebSocket(
+        wss_protocol + window.location.host + '/ws/chat/' + roomName + '/'
+    );
 
-        // 建立websocket连接时触发此方法，展示欢迎提示
-        chatSocket.onopen = function(e) {
-             document.querySelector('#chat-log').value += ('[公告]Welcome to ' + roomName + '\n')
-         }
+    // 建立websocket连接时触发此方法，展示欢迎提示
+    chatSocket.onopen = function (e) {
+        document.querySelector('#chat-log').value += ('[Notice]Welcome to ' + roomName + '\n')
+    }
 
-        // 从后台接收到数据时触发此方法
-        // 接收到后台数据后对其解析，并加入到聊天记录chat-log
-         chatSocket.onmessage = function(e) {
-             const data = JSON.parse(e.data);
-             document.querySelector('#chat-log').value += (data.message + '\n');
-         };
+    // 从后台接收到数据时触发此方法
+    // 接收到后台数据后对其解析，并加入到聊天记录chat-log
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#chat-log').value += (data.message + '\n');
+    };
 
-         // websocket连接断开时触发此方法
-         chatSocket.onclose = function(e) {
-             console.error('Chat socket closed unexpectedly');
-         };
+    // websocket连接断开时触发此方法
+    chatSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
 
-         document.querySelector('#chat-message-input').focus();
-         document.querySelector('#chat-message-input').onkeyup = function(e) {
-             if (e.keyCode === 13) {  // enter, return
-                 document.querySelector('#chat-message-submit').click();
-             }
-         };
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function (e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
 
-         // 每当点击发送消息按钮，通过websocket的send方法向后台发送信息。
-         document.querySelector('#chat-message-submit').onclick = function(e) {
-             const messageInputDom = document.querySelector('#chat-message-input');
-             const message = messageInputDom.value;
+    // 每当点击发送消息按钮，通过websocket的send方法向后台发送信息。
+    document.querySelector('#chat-message-submit').onclick = function (e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
 
-             //注意这里:先把文本数据转成json格式,然后调用send方法发送。
-             chatSocket.send(JSON.stringify({
-                 'message': message
-             }));
-             messageInputDom.value = '';
-         };
-        </script>
+        //注意这里:先把文本数据转成json格式,然后调用send方法发送。
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+</script>
 </body>
 </html>

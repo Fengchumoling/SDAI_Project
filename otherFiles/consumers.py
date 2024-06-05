@@ -32,8 +32,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
+        sender = 'test1'
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            "message": f'{datetime_str}:{message}'
+            "message": f'{datetime_str}{sender}:{message}'
         }))
