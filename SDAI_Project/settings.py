@@ -13,6 +13,11 @@ import os
 
 from pathlib import Path
 
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from otherFiles import routing
+from otherFiles.consumers import CustomAuthMiddleware
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -86,7 +91,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'PMS',
+        'NAME': 'PMSS',
         'USER': 'root',  # 输入自己的
         # 'PASSWORD': '20030613ZSYzsy.',  # 输入自己的
         'PASSWORD': '',  # 输入自己的
@@ -158,3 +163,16 @@ EMAIL_HOST_PASSWORD = "miuvlfgmhregebed"
 EMAIL_USE_TLS = True
 Email_From = EMAIL_HOST_USER
 email_title = "email register"
+
+LOGIN_URL = "/login/"
+
+application = ProtocolTypeRouter({
+    "http": ASGI_APPLICATION,
+    "websocket": AuthMiddlewareStack(
+        CustomAuthMiddleware(
+            URLRouter(
+                routing.websocket_urlpatterns
+            )
+        )
+    ),
+})

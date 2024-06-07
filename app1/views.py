@@ -3,8 +3,10 @@ from datetime import datetime
 
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
-from .models import WBSElement, User, Group, Project, Task, Link
-from django.contrib.auth import login, authenticate
+from .models import WBSElement, Group, Project, Task, Link
+from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from otherFiles.forms import *
 from django.core.mail import send_mail
@@ -12,15 +14,19 @@ from django.core.mail import send_mail
 
 # Create your views here.
 
+@login_required
 def index(request):
     # print(request.session['user_id'])
-    print(request.user)
+    # print(request.user)
 
-    user_id = request.session['user_id']
-    group_projects = get_project_fun(user_id)
-    user = User.objects.get(id=user_id)
-    request.user = user
-    print(request.user)
+    user = request.user
+    # user_id = request.session['user_id']
+    #
+    # group_projects = get_project_fun(user_id)
+    group_projects = get_project_fun(user)
+    # user = User.objects.get(id=user_id)
+    # request.user = user
+    # print(request.user)
     user_tasks = user.tasks.all()
     context = {
         'group_projects': group_projects,
@@ -35,31 +41,16 @@ def d3j(request):
 
 
 def gantt(request):
-    return render(request, 'gantt.html')
+    return render(request, 'gantt2.html')
 
 
 def get_gantt_data(request):
     print("API")
-    # data = {
-    #     "tasks": [
-    #         {"id": 1, "text": "Project #1", "start_date": "01-6-2024", "duration": 18},
-    #         {"id": 2, "text": "Task #1", "start_date": "26-5-2024", "duration": 8, "parent": 1},
-    #         {"id": 3, "text": "Task #2", "start_date": "01-5-2024", "duration": 8, "parent": 1}
-    #     ],
-    #     "links": [
-    #         {"id": 1, "source": 1, "target": 2, "type": "1"},
-    #         {"id": 2, "source": 2, "target": 3, "type": "0"}
-    #     ]
-    # }
 
     project = Project.objects.get(id=request.session['project_id'])
     tasks = project.tasks.all()
     links = project.links.all()
-    # # 获取所有任务(Task)和链接(Link)对象
-    # tasks = Task.objects.all()
-    # links = Link.objects.all()
 
-    # 构建任务(Task)数据列表
     tasks_data = []
     for task in tasks:
         task_data = {
@@ -68,11 +59,11 @@ def get_gantt_data(request):
             "start_date": task.start_date.strftime('%d-%m-%Y'),
             "duration": task.duration,
             "parent": task.parent,
-            # 如果需要，可以添加其他字段
+            "progress": task.progress,
+            "Holder": task.holder.username
         }
         tasks_data.append(task_data)
 
-    # 构建链接(Link)数据列表
     links_data = []
     for link in links:
         link_data = {
@@ -80,32 +71,34 @@ def get_gantt_data(request):
             "source": link.source,
             "target": link.target,
             "type": link.type,
-            # 如果需要，可以添加其他字段
         }
         links_data.append(link_data)
 
-    # 构建包含任务和链接的数据字典
     data = {
         "tasks": tasks_data,
         "links": links_data
     }
 
-    print(tasks)
-    print(links)
+    # print(tasks)
+    # print(links)
 
     return JsonResponse(data)
 
 
 def change_gantt_data(request):
-    print("Change GanttData")
+    # print("Change GanttData")
     # print(request.POST.get('csrfmiddlewaretoken'))
     editing = request.GET.get('editing')
     gantt_mode = request.GET.get('gantt_mode')
 
     project_id = request.session['project_id']
     project = Project.objects.get(id=project_id)
-    user_id = request.session['user_id']
-    user = User.objects.get(id=user_id)
+    group = project.group
+    control = group.control
+    current_user = request.user
+
+    if current_user != control:
+        return HttpResponse('You are not allowed to change gantt data')
 
     if gantt_mode == "tasks":
         id = request.POST.get('id')
@@ -115,40 +108,96 @@ def change_gantt_data(request):
         end_date_str = request.POST.get('end_date')
         progress = request.POST.get('progress')
         parent = request.POST.get('parent')
-        holder = user
+        holder_name = request.POST.get('Holder')
         nativeeditor_status = request.POST.get('!nativeeditor_status')
-        print(id)
+
+        # print(type(progress))
 
         start_date = datetime.strptime(start_date_str, '%d-%m-%Y %H:%M')
         end_date = datetime.strptime(end_date_str, '%d-%m-%Y %H:%M')
 
-        print(id, start_date_str, start_date, end_date_str, end_date, text, duration, parent, holder,
-              nativeeditor_status)
+        holder_user = User.objects.get(username=holder_name)
+        progress_float = round(float(progress), 2)
 
-        # task = Task.objects.create(
-        #     id=id,
-        #     text=text,
-        #     start_date=start_date,
-        #     end_date=end_date,
-        #     duration=duration,
-        #     progress=progress,
-        #     parent=parent,
-        #     project=project,
-        #     holder=holder
-        # )
+        if nativeeditor_status == "inserted" or nativeeditor_status == "updated":
+            task, created = Task.objects.update_or_create(
+                id=id,
+                defaults={
+                    'text': text,
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'duration': duration,
+                    'progress': progress_float,
+                    'parent': parent,
+                    'project': project,
+                    'holder': holder_user
+                }
+            )
+            return HttpResponse('Task added')
 
-        print(nativeeditor_status)
-        print('success create task')
-        # print(task)
-
+        elif nativeeditor_status == "deleted":
+            res = {'status': "ok"}
+            return JsonResponse(res)
 
     elif gantt_mode == "links":
-        pass
-    else:
-        pass
+        source = request.POST.get('source')
+        target = request.POST.get('target')
+        type = request.POST.get('type')
+        id = request.POST.get('id')
+        nativeeditor_status = request.POST.get('!nativeeditor_status')
+        if nativeeditor_status == "inserted" or nativeeditor_status == "updated":
+            link, created = Link.objects.update_or_create(
+                id=id,
+                defaults={
+                    'source': source,
+                    'target': target,
+                    'type': type,
+                    'project': project,
+                }
+            )
 
-    # print(data)
-    return HttpResponse("Change GanttData")
+        return HttpResponse('Link added')
+
+    else:
+        return HttpResponse('error')
+
+    return HttpResponse('error')
+
+
+def gantt_delete_task(request):
+    project_id = request.session['project_id']
+    project = Project.objects.get(id=project_id)
+    group = project.group
+    control = group.control
+    current_user = request.user
+
+    if current_user != control:
+        res = {'status': "false"}
+        return JsonResponse(res)
+
+    task_id = request.POST.get('id')
+    task = Task.objects.get(id=task_id)
+    task.delete()
+    res = {'status': "ok"}
+    return JsonResponse(res)
+
+
+def gantt_delete_link(request):
+    project_id = request.session['project_id']
+    project = Project.objects.get(id=project_id)
+    group = project.group
+    control = group.control
+    current_user = request.user
+
+    if current_user != control:
+        res = {'status': "false"}
+        return JsonResponse(res)
+
+    link_id = request.POST.get('id')
+    link = Link.objects.get(id=link_id)
+    link.delete()
+    res = {'status': "ok"}
+    return JsonResponse(res)
 
 
 def get_wbs_data(request):
@@ -168,22 +217,6 @@ def wbs_tool(request):
 
 
 # User Management System
-# def register(request):
-#     if request.method == 'POST':
-#         form = UserRegisterForm(request.POST)
-#         username = request.POST['name']
-#         email = request.POST['email']
-#         password = request.POST['password1']
-#         # print(username, email, password)
-#         if form.is_valid():
-#             # user = form.save()
-#             user = User.objects.create_user(email=email, name=username, password=password)
-#             request.session['user_id'] = user.id
-#             # login(request, user)
-#             return redirect('index')
-#     else:
-#         form = UserRegisterForm()
-#     return render(request, 'register.html', {'form': form})
 
 def register(request):
     if request.method == "POST":
@@ -199,6 +232,8 @@ def register(request):
         if not sms_code == sms_input:
             return render(request, 'register.html', {'error': "can not confirm sms code"})
 
+        user = User.objects.create_user(username=username, password=password1, email=email)
+        login(request, user)
         return redirect('index')
 
     return render(request, 'register.html')
@@ -215,7 +250,8 @@ def send_sms_code(email):
 
 
 def send_sms_code_view(request):
-    email = request.GET.get('email')
+    # email = request.GET.get('email')
+    email = '1656296953@qq.com'
     send_status, sms_code = send_sms_code(email)
     request.session['sms_code'] = sms_code
     return HttpResponse(send_status)
@@ -223,15 +259,19 @@ def send_sms_code_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        print(email, password)
+        # email = request.POST['email']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        # username = 'test1'
+        # password = '12345678'
+        # print(email, password)
         # user = authenticate(request, email=email, password=password)
-        user = User.objects.get(email=email)
-        if user.check_password(password):
+        user = authenticate(username=username, password=password)
+        # user = User.objects.get(email=email)
+        # if user.check_password(password):
+        if user:
             # print("Login Successful")
-            # login(request, user)
-            request.user = user
+            login(request, user)
             request.session['user_id'] = user.id
             # print(request.user.name, request.user.id)
             return redirect('index')
@@ -243,13 +283,20 @@ def login_view(request):
         return render(request, 'login.html')
 
 
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('index')
+
+
 # Project Management
 def project_create(request):
     if request.method == 'POST':
         project_name = request.POST['project_name']
         group_name = request.POST['group_name']
-        user_id = request.session['user_id']
-        user = User.objects.get(id=user_id)
+        # user_id = request.session['user_id']
+        # user = User.objects.get(id=user_id)
+        user = request.user
 
         print(project_name, group_name, user)
 
@@ -264,8 +311,8 @@ def project_create(request):
         return render(request, 'project_create.html')
 
 
-def get_project_fun(user_id):
-    user = User.objects.get(id=user_id)
+def get_project_fun(user):
+    # user = User.objects.get(id=user_id)
     groups = user.members.all()
     group_projects = []
     if groups is not None:
@@ -279,8 +326,9 @@ def get_project_fun(user_id):
 
 
 def get_project(request):
-    user_id = request.session['user_id']
-    group_projects = get_project_fun(user_id)
+    # user_id = request.session['user_id']
+    user = request.user
+    group_projects = get_project_fun(user)
     return render(request, 'project.html', {'group_projects': group_projects})
 
 
@@ -295,6 +343,8 @@ def project_detail(request, pid):
 
 def group_detail(request, gid):
     group = Group.objects.get(id=gid)
+    project = group.project
+    request.session['project_id'] = project.id
     control = group.control
     members = group.members.all()
     context = {
@@ -316,7 +366,7 @@ def get_group_members(request):
     # group = Group.objects.get(id=group_id)
     members = group.members.all()
     for member in members:
-        members_array.append({"key": member.email, "label": member.name})
+        members_array.append({"key": member.username, "label": member.username})
     # opts = [
     #     {"key": 'a@c.com', "label": 'first user'},
     #     {'key': 'a@c.com', 'label': 'second user'},
@@ -325,8 +375,59 @@ def get_group_members(request):
     return JsonResponse(members_array, safe=False)
 
 
-def add_group_member(request):
-    return HttpResponse("success")
+def add_group_member(request, gid):
+    if request.method == "POST":
+        # return HttpResponse("success")
+        username = request.POST['username']
+
+        user_check = User.objects.filter(username=username)
+        print(user_check.exists())
+        if not user_check.exists():
+            return JsonResponse({'msg': 'There is no such user'})
+
+        user_add = User.objects.get(username=username)
+
+        if user_add:
+            group = Group.objects.get(id=gid)
+            current_user = request.user
+            control = group.control
+            if user_add in group.members.all():
+                return JsonResponse({'msg': "The user is already in the group"})
+            if current_user == control:
+                group.members.add(user_add)
+                return JsonResponse({'msg': 'success'})
+            else:
+                return JsonResponse({'msg': 'You are not allowed to add a member'})
+        else:
+            return JsonResponse({'msg': 'There is no such user'})
+    else:
+        return JsonResponse({'msg': 'illegal access'})
+
+
+def delete_group_member(request, gid, uid):
+    group = Group.objects.get(id=gid)
+    current_user = request.user
+    control = group.control
+    target_url = '/group/{}'.format(gid)
+    if current_user == control:
+        user_remove = User.objects.get(id=uid)
+        group.members.remove(user_remove)
+        return redirect(target_url)
+    else:
+        return redirect(target_url)
+
+
+def group_delete(request, pid):
+    group = Group.objects.get(id=pid)
+    project = group.project
+    control = group.control
+    if request.user == control:
+        project.delete()
+        group.delete()
+        print("success delete")
+        return redirect('index')
+    else:
+        return redirect('index')
 
 
 # Chat Function
@@ -355,11 +456,12 @@ def once_task(request):
     # user = User.objects.create_user(email="test@a.com", name="test1", password="12345678")
     # request.session['user_id'] = user.id
 
+    # user1 = request.user
     # user1 = User.objects.create_user(email="test1@a.com", name="test1", password="12345678")
-    # user2 = User.objects.create_user(email="test2@a.com", name="test2", password="12345678")
-    # user3 = User.objects.create_user(email="test3@a.com", name="test3", password="12345678")
-    # user4 = User.objects.create_user(email="test4@a.com", name="test4", password="12345678")
-    # user5 = User.objects.create_user(email="test5@a.com", name="test5", password="12345678")
+    # user2 = User.objects.create_user(email="test2@a.com", username="test2", password="12345678")
+    # user3 = User.objects.create_user(email="test3@a.com", username="test3", password="12345678")
+    # user4 = User.objects.create_user(email="test4@a.com", username="test4", password="12345678")
+    # user5 = User.objects.create_user(email="test5@a.com", username="test5", password="12345678")
 
     # request.session['user_id'] = user1.id
 
@@ -370,12 +472,15 @@ def once_task(request):
     # user5 = User.objects.get(id=5)
     #
     # group1 = Group.objects.create(name="First Group", control=user1)
-    # group1.members.add(user1, user2, user3)
+    # group1 = Group.objects.get(id=1)
+    # group1.members.add(user2, user3)
     # project1 = Project.objects.create(name="User Management System", group=group1)
     #
     # group2 = Group.objects.create(name="Group 2", control=user1)
-    # group2.members.add(user1, user4, user5)
-    # project2 = Project.objects.create(name="Robot System", group=group2)
+    # group2.members.add(user4, user5)
+    # project2 = Project.objects.create(name="User Management System", group=group2)
+
+    group2 = Group.objects.get(id=2)
 
     return redirect('index')
 

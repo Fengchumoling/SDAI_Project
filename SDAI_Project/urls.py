@@ -26,17 +26,22 @@ urlpatterns = [
     path("index/", index, name="index"),
     path("", index, name="home"),
     path("d3j/", d3j),
-    path("gantt/", gantt),
 
+    # Gantt chart
+    path("gantt/", gantt),
     path("getGanttData/", get_gantt_data),
     path("changeGanttData/", change_gantt_data),
     path("gantt/", gantt, name='gantt'),
     path('wbs_tool/', wbs_tool, name='wbs_tool'),
     path('get-wbs-data/', get_wbs_data, name='get_wbs_data'),
+    path('deleteTask/', gantt_delete_task),
+    path('deleteLink/', gantt_delete_link),
+
 
     # User Management System
     path("register/", register, name='register'),
     path("login/", login_view, name='login'),
+    path("logout/", logout_view),
     path("sendsms/", send_sms_code_view),
 
 
@@ -44,10 +49,13 @@ urlpatterns = [
     path("project/create", project_create),
     path("project/", get_project),
     path("project/<int:pid>", project_detail, name='project_detail'),
+    path("group/<int:pid>/delete", group_delete, name='group_delete'),
+
 
     # Group Management
     path("group/<int:gid>/", group_detail, name='group_detail'),
     path("group/<int:gid>/addmember", add_group_member),
+    path("group/<int:gid>/delete/<int:uid>", delete_group_member, name='delete_group_member'),
     path("getMemberData/", get_group_members, name='get_group_members'),
 
 

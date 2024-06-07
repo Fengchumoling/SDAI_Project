@@ -21,13 +21,13 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">SDAI</a>
+            <a class="navbar-brand" href="/index/">SDAI</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">HOME</a></li>
+                <li><a href="/index/">HOME</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">Register/Login<span class="caret"></span></a>
@@ -35,6 +35,7 @@
                         <li><a href="/register/">Register</a></li>
                         <li role="separator" class="divider"></li>
                         <li><a href="/login/">Login</a></li>
+                        <li><a href="/logout/">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -72,7 +73,8 @@
 
     // 建立websocket连接时触发此方法，展示欢迎提示
     chatSocket.onopen = function (e) {
-        document.querySelector('#chat-log').value += ('[Notice]Welcome to ' + roomName + '\n')
+        document.querySelector('#chat-log').value ='';
+        document.querySelector('#chat-log').value += ('[Notice]Welcome to ' + roomName + '\n');
     }
 
     // 从后台接收到数据时触发此方法
@@ -82,9 +84,14 @@
         document.querySelector('#chat-log').value += (data.message + '\n');
     };
 
+
     // websocket连接断开时触发此方法
     chatSocket.onclose = function (e) {
         console.error('Chat socket closed unexpectedly');
+        console.log(e)
+        if (e.code == 1) {
+            window.location.href = '/index';
+        }
     };
 
     document.querySelector('#chat-message-input').focus();
@@ -97,7 +104,12 @@
     // 每当点击发送消息按钮，通过websocket的send方法向后台发送信息。
     document.querySelector('#chat-message-submit').onclick = function (e) {
         const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value;
+        const message = messageInputDom.value.trim();
+
+        if (message === '') {
+            alert('Please enter some text to send'); // 弹窗提示
+            return; // 停止发送
+        }
 
         //注意这里:先把文本数据转成json格式,然后调用send方法发送。
         chatSocket.send(JSON.stringify({
@@ -105,6 +117,7 @@
         }));
         messageInputDom.value = '';
     };
+
 </script>
 </body>
 </html>

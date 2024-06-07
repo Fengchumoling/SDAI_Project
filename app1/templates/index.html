@@ -22,13 +22,13 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">SDAI</a>
+            <a class="navbar-brand" href="/index/">SDAI</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">HOME</a></li>
+                <li><a href="/index/">HOME</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">Register/Login<span class="caret"></span></a>
@@ -36,6 +36,7 @@
                         <li><a href="/register/">Register</a></li>
                         <li role="separator" class="divider"></li>
                         <li><a href="/login/">Login</a></li>
+                        <li><a href="/logout/">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -55,11 +56,11 @@
                     <H4>{{ group.name }} -- {{ project.name }}</H4>
 
                         <div class="col-md-6">
-                            <a href="{% url 'project_detail' project.id %}" class="btn btn-default" role="button">Go
+                            <a href="{% url 'project_detail' project.id %}" class="btn btn-default" role="button" target="_blank">Go
                                 to Project</a>
                         </div>
                         <div class="col-md-6">
-                            <a href="{% url 'group_detail' group.id %}" class="btn btn-default" role="button">Go to
+                            <a href="{% url 'group_detail' group.id %}" class="btn btn-default" role="button" target="_blank">Go to
                                 Group</a>
                         </div>
                 {% endfor %}
