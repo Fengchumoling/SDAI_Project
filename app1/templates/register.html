@@ -123,10 +123,10 @@
             method: 'GET', // 或者 'GET'
             data: {email: emailValue},
             success: function (response) {
-                console.log('短信发送成功！');
+                console.log('sms sent successfully！');
             },
             error: function (xhr, status, error) {
-                console.error('短信发送失败:', error);
+                console.error('sms sent failed:', error);
             }
         });
 

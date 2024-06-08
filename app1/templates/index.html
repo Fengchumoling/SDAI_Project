@@ -100,11 +100,12 @@
                 <!-- 右半边，用于展示报告 -->
                 <div class="col-md-6" id="report">
                     <h2>Report</h2>
-                    <p>You Are test1</p>
-                    <p>You are assigned 4 tasks, of which 1 is finished, 1 is in progress, and 2 are waiting to
+                    <p>You Are {{ user.username }}</p>
+                    <p>You are assigned {{ tasks_count_all }} tasks, of which {{ tasks_count_past }} is finished, {{ tasks_count_current }} is in progress, and
+                        {{ tasks_count_future }} are waiting to
                         start.</p>
-                    <p>Eight days to complete all tasks.</p>
-                    <p>The next schedule is reasonable and there is no duplication of tasks.</p>
+                    <p>{{ days_remaining }} days to complete all tasks.</p>
+                    <p>{{ overlapping_content}}</p>
                     <table class="table table-striped">
                         <!-- 表格内容 -->
                     </table>

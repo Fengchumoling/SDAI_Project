@@ -74,7 +74,7 @@
     // 建立websocket连接时触发此方法，展示欢迎提示
     chatSocket.onopen = function (e) {
         document.querySelector('#chat-log').value ='';
-        document.querySelector('#chat-log').value += ('[Notice]Welcome to ' + roomName + '\n');
+        document.querySelector('#chat-log').value += ('[Notice]Welcome to group ' + roomName + ' chat room! '+'\n');
     }
 
     // 从后台接收到数据时触发此方法

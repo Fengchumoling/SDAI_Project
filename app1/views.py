@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from django.utils import timezone
 
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
@@ -16,22 +17,52 @@ from django.core.mail import send_mail
 
 @login_required
 def index(request):
-    # print(request.session['user_id'])
-    # print(request.user)
-
     user = request.user
-    # user_id = request.session['user_id']
-    #
-    # group_projects = get_project_fun(user_id)
     group_projects = get_project_fun(user)
-    # user = User.objects.get(id=user_id)
-    # request.user = user
-    # print(request.user)
     user_tasks = user.tasks.all()
+    now = timezone.now()
+
+    past_tasks = user_tasks.filter(end_date__lt=now)
+    current_tasks = user_tasks.filter(start_date__lt=now, end_date__gt=now)
+    future_tasks = user_tasks.filter(start_date__gt=now)
+
+    tasks_count_all = user_tasks.count()
+    tasks_count_past = past_tasks.count()
+    tasks_count_current = current_tasks.count()
+    tasks_count_future = future_tasks.count()
+
+    latest_task = user_tasks.order_by('-end_date').first()
+    if latest_task:
+        days_remaining = (latest_task.end_date - now).days
+    else:
+        days_remaining = 0
+
+    overlapping_tasks = []
+
+    for i, task1 in enumerate(user_tasks):
+        for task2 in user_tasks[i + 1:]:
+            if (task1.start_date < task2.end_date) and (task2.start_date < task1.end_date):
+                overlapping_tasks.append((task1, task2))
+
+    if overlapping_tasks:
+        overlapping_content = ''
+        for task1, task2 in overlapping_tasks:
+            s = f'({task1.text}, {task2.text}),'
+            overlapping_content += s
+        overlapping_content += 'these tasks have conflicting schedules.'
+    else:
+        overlapping_content = 'The next schedule is reasonable and there is no duplication of tasks.'
+
     context = {
         'group_projects': group_projects,
         'user': user,
         'user_tasks': user_tasks,
+        'tasks_count_all': tasks_count_all,
+        'tasks_count_past': tasks_count_past,
+        'tasks_count_current': tasks_count_current,
+        'tasks_count_future': tasks_count_future,
+        'days_remaining': days_remaining,
+        'overlapping_content': overlapping_content
     }
     return render(request, 'index.html', context=context)
 
@@ -250,8 +281,8 @@ def send_sms_code(email):
 
 
 def send_sms_code_view(request):
-    # email = request.GET.get('email')
-    email = '1656296953@qq.com'
+    email = request.GET.get('email')
+    # email = '1656296953@qq.com'
     send_status, sms_code = send_sms_code(email)
     request.session['sms_code'] = sms_code
     return HttpResponse(send_status)
@@ -347,14 +378,61 @@ def group_detail(request, gid):
     request.session['project_id'] = project.id
     control = group.control
     members = group.members.all()
+    now = timezone.now()
+    project_tasks = project.tasks.all()
+
+    earliest_task = project_tasks.order_by('start_date').first()
+    latest_task = project_tasks.order_by('-end_date').first()
+
+    if earliest_task:
+        project_start_date = earliest_task.start_date
+    else:
+        project_start_date = ''
+
+    if latest_task:
+        days_remaining = (latest_task.end_date - now).days
+        project_end_date = latest_task.end_date
+    else:
+        project_end_date = ''
+        days_remaining = 0
+
+    past_tasks = project_tasks.filter(end_date__lt=now)
+    current_tasks = project_tasks.filter(start_date__lt=now, end_date__gt=now)
+    future_tasks = project_tasks.filter(start_date__gt=now)
+
+    tasks_count_all = project_tasks.count()
+    tasks_count_past = past_tasks.count()
+    tasks_count_current = current_tasks.count()
+    tasks_count_future = future_tasks.count()
+
+    abnormal_content = ''
+    abnormal_tasks = []
+    for task in past_tasks:
+        if task.progress != 1:
+            abnormal_tasks.append(task)
+
+    if abnormal_tasks:
+        abnormal_content += 'Abnormal tasks: '
+        for task in abnormal_tasks:
+            abnormal_content += f'{task.text},'
+        abnormal_content += ' please handle it as soon as possible.'
+    else:
+        abnormal_content = 'The project is progressing normally and the task has ended normally.'
+
     context = {
         'group': group,
         'control': control,
-        'members': members
+        'members': members,
+        'project_start_date': project_start_date,
+        'project_end_date': project_end_date,
+        'tasks_count_all': tasks_count_all,
+        'tasks_count_past': tasks_count_past,
+        'tasks_count_current': tasks_count_current,
+        'tasks_count_future': tasks_count_future,
+        'abnormal_content': abnormal_content,
+        'days_remaining': days_remaining,
     }
     return render(request, 'group.html', context=context)
-
-    # return HttpResponse('This is the group detail view')
 
 
 def get_group_members(request):
