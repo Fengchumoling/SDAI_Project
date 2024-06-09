@@ -85,19 +85,18 @@ WSGI_APPLICATION = "SDAI_Project.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'PMSS',
-        'USER': 'root',  # 输入自己的
-        # 'PASSWORD': '20030613ZSYzsy.',  # 输入自己的
-        'PASSWORD': '',  # 输入自己的
-        'HOST': '127.0.0.1',
-        'PORT': 3306,
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'PMSS',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': '127.0.0.1',
+    #     'PORT': 3306,
+    # }
 }
 
 # Password validation

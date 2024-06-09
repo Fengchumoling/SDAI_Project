@@ -110,15 +110,10 @@ def get_gantt_data(request):
         "links": links_data
     }
 
-    # print(tasks)
-    # print(links)
-
     return JsonResponse(data)
 
 
 def change_gantt_data(request):
-    # print("Change GanttData")
-    # print(request.POST.get('csrfmiddlewaretoken'))
     editing = request.GET.get('editing')
     gantt_mode = request.GET.get('gantt_mode')
 
@@ -282,7 +277,6 @@ def send_sms_code(email):
 
 def send_sms_code_view(request):
     email = request.GET.get('email')
-    # email = '1656296953@qq.com'
     send_status, sms_code = send_sms_code(email)
     request.session['sms_code'] = sms_code
     return HttpResponse(send_status)
@@ -290,27 +284,19 @@ def send_sms_code_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        # email = request.POST['email']
         username = request.POST.get('username')
         password = request.POST.get('password')
-        # username = 'test1'
-        # password = '12345678'
-        # print(email, password)
-        # user = authenticate(request, email=email, password=password)
+
         user = authenticate(username=username, password=password)
-        # user = User.objects.get(email=email)
-        # if user.check_password(password):
+
         if user:
-            # print("Login Successful")
             login(request, user)
             request.session['user_id'] = user.id
-            # print(request.user.name, request.user.id)
             return redirect('index')
         else:
             print('login fail')
             return render(request, 'login.html', {'error': 'Invalid email or password'})
     else:
-        # print(request.user)
         return render(request, 'login.html')
 
 
@@ -535,7 +521,7 @@ def once_task(request):
     # request.session['user_id'] = user.id
 
     # user1 = request.user
-    # user1 = User.objects.create_user(email="test1@a.com", name="test1", password="12345678")
+    # user1 = User.objects.create_user(email="test1@a.com", username="test1", password="12345678")
     # user2 = User.objects.create_user(email="test2@a.com", username="test2", password="12345678")
     # user3 = User.objects.create_user(email="test3@a.com", username="test3", password="12345678")
     # user4 = User.objects.create_user(email="test4@a.com", username="test4", password="12345678")
@@ -549,16 +535,16 @@ def once_task(request):
     # user4 = User.objects.get(id=4)
     # user5 = User.objects.get(id=5)
     #
-    # group1 = Group.objects.create(name="First Group", control=user1)
+    # group1 = Group.objects.create(name="Robot System Group", control=user1)
     # group1 = Group.objects.get(id=1)
     # group1.members.add(user2, user3)
-    # project1 = Project.objects.create(name="User Management System", group=group1)
-    #
-    # group2 = Group.objects.create(name="Group 2", control=user1)
-    # group2.members.add(user4, user5)
-    # project2 = Project.objects.create(name="User Management System", group=group2)
+    # project1 = Project.objects.create(name="Robot System", group=group1)
 
-    group2 = Group.objects.get(id=2)
+    # group2 = Group.objects.create(name="DM Group", control=user1)
+    # group2.members.add(user4, user5)
+    # project2 = Project.objects.create(name="Data Mining", group=group2)
+
+    # group2 = Group.objects.get(id=2)
 
     return redirect('index')
 
